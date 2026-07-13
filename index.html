@@ -58,7 +58,7 @@
 </head>
 <body>
 
-<div id="loading" class="loading">📡 正在實時連線 Google Sheet 讀取最新數據...</div>
+<div id="loading" class="loading">📡 正在實時連線 Google Sheet 4人新表數據...</div>
 
 <div class="app-container" id="app">
     <div class="header">
@@ -158,12 +158,10 @@ function copyCurrentAmount() {
     }
 }
 
-// 🟢 自動帶入電話 85261866188 與「已付$XX.00」訊息
 function sendWhatsAppNotification() {
     const amtText = document.getElementById('totalAmount').innerText.replace('$', '').trim();
     if(amtText && amtText !== "0.00") {
         const message = `已付$${amtText}`;
-        // 帶有 852 國碼的收款號碼，會直接開啟與該號碼的私訊對話
         const whatsappUrl = `https://api.whatsapp.com/send?phone=85261866188&text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
@@ -173,22 +171,30 @@ async function initApp() {
     try {
         const csvBaseUrl = BASE_PUBLISH_URL.replace('/pubhtml', '/pub?output=csv');
         
-        const resSettings = await fetch(`${csvBaseUrl}&gid=2024390252`);
+        // 🌟 新表對應：讀取 4人新表 的 Settings 分頁 (gid=777656204)
+        const resSettings = await fetch(`${csvBaseUrl}&gid=777656204`);
         const textSettings = await resSettings.text();
         const arrSettings = csvToArray(textSettings);
         
         globalData.settingsHeaders = arrSettings[0].map(h => h ? h.trim() : "");
         
+        // 🛠️ 核心修正：動態取得各欄位的精確位置索引，避免欄位錯位移位導致網頁空白
+        const monthIdx = globalData.settingsHeaders.indexOf("Month");
+        const shuttleFeeIdx = globalData.settingsHeaders.indexOf("Total_Shuttlecock_Fee");
+        const nameIdx = globalData.settingsHeaders.indexOf("Name");
+        const empIdx = globalData.settingsHeaders.indexOf("Employee");
+        const guestIdx = globalData.settingsHeaders.indexOf("Guess");
+
         let lastSeenMonth = ""; 
         
         arrSettings.forEach((row, index) => {
             if (index === 0) return; 
             
-            let mCol = row[0] ? row[0].trim() : "";
-            let feeCol = row[1] ? row[1].trim() : "";
-            let nameCol = row[3] ? row[3].trim() : "";
-            let empCol = row[4] ? row[4].trim().toUpperCase() : "";
-            let gstCol = row[5] ? row[5].trim().toUpperCase() : "";
+            let mCol = (monthIdx !== -1 && row[monthIdx]) ? row[monthIdx].trim() : "";
+            let feeCol = (shuttleFeeIdx !== -1 && row[shuttleFeeIdx]) ? row[shuttleFeeIdx].trim() : "";
+            let nameCol = (nameIdx !== -1 && row[nameIdx]) ? row[nameIdx].trim() : "";
+            let empCol = (empIdx !== -1 && row[empIdx]) ? row[empIdx].trim().toUpperCase() : "";
+            let gstCol = (guestIdx !== -1 && row[guestIdx]) ? row[guestIdx].trim().toUpperCase() : "";
             
             if (mCol !== "" && !mCol.includes("function") && !mCol.includes("Object")) {
                 lastSeenMonth = mCol;
@@ -204,6 +210,7 @@ async function initApp() {
             }
         });
 
+        // 讀取 Sessions 核心數據分頁 (gid=0)
         const resSessions = await fetch(`${csvBaseUrl}&gid=0`);
         const textSessions = await resSessions.text();
         const arrSessions = csvToArray(textSessions);
@@ -305,6 +312,11 @@ function renderBill() {
     let isPaid = false;
     if (paidColumnIndex !== -1 && memberConfig.rawRowData[paidColumnIndex]) {
         isPaid = memberConfig.rawRowData[paidColumnIndex].trim().toUpperCase() === 'TRUE';
+    } else {
+        const fallbackPaidIdx = globalData.settingsHeaders.indexOf("Paid");
+        if (fallbackPaidIdx !== -1 && memberConfig.rawRowData[fallbackPaidIdx]) {
+            isPaid = memberConfig.rawRowData[fallbackPaidIdx].trim().toUpperCase() === 'TRUE';
+        }
     }
 
     let dateKeywordShort = selectedMonth; 
