@@ -3,28 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>羽毛球結算表 (新群組)</title>
+    <title>羽毛球費用結算系統 (HKT)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
         body { background-color: #f5f7fb; color: #333; padding: 12px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 450px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; display: none; }
         .loading { padding: 40px; text-align: center; font-size: 16px; color: #666; font-weight: bold; }
-        
-        /* Header */
         .header { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 24px 16px; text-align: center; }
         .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
         .header p { font-size: 13px; opacity: 0.9; }
         .header .remark { font-size: 12px; color: #ffeaa7; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
-        
-        /* 篩選切換 */
         .selector-box { padding: 12px 16px; border-bottom: 1px solid #eee; background: #fafafa; display: flex; gap: 10px; }
         .select-group { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .select-group label { font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; }
         select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; background: white; width: 100%; }
-
         .main-content { padding: 16px; }
-        
-        /* 總數卡片 */
         .summary-card { background: #fff5f5; border: 1px solid #ffe3e3; border-left: 6px solid #ff4d4d; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; transition: all 0.3s ease; }
         .summary-card.is-paid { background: #f4fbf7; border: 1px solid #d1f2e1; border-left: 6px solid #27ae60; }
         .total-label { font-size: 14px; color: #666; font-weight: 500; }
@@ -34,15 +27,9 @@
         .status-badge { color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-top: 4px; }
         .status-badge.unpaid { background: #ff4d4d; }
         .status-badge.paid { background: #27ae60; }
-
-        /* 📋 複製金額按鈕樣式 */
         .copy-amt-btn { background: rgba(0,0,0,0.05); color: #555; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: background 0.2s; }
         .copy-amt-btn:hover { background: rgba(0,0,0,0.1); }
-
-        /* 列表標題 */
         .section-title { font-size: 15px; color: #666; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; }
-        
-        /* 每場活動明細 */
         .card-list { display: flex; flex-direction: column; gap: 12px; }
         .session-card { background: #fff; border: 1px solid #eaeaea; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
         .card-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #11998e; margin-bottom: 8px; border-bottom: 1px solid #f5f5f5; padding-bottom: 6px; }
@@ -50,19 +37,17 @@
         .row-detail { display: flex; justify-content: space-between; margin-top: 2px; }
         .row-detail.sub { color: #888; font-size: 12px; padding-left: 10px; }
         .row-total { display: flex; justify-content: space-between; font-weight: bold; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #ddd; color: #333; }
-
-        /* 付款按鈕 */
         .pay-box { background: #eef9ff; border: 1px solid #cfe9ff; border-radius: 12px; padding: 14px; margin-top: 20px; text-align: center; font-size: 13px; }
         .pay-btn { background: #11998e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 8px; font-size: 14px; cursor: pointer; display: block; text-decoration: none; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading">📡 正在實時連線 Google Sheet 讀取最新數據...</div>
+<div id="loading" class="loading">📡 正在實時連線 HKT 試算表讀取最新數據...</div>
 
 <div class="app-container" id="app">
     <div class="header">
-        <h1>🏸 羽毛球費用查閱系統</h1>
+        <h1>🏸 羽毛球費用查閱系統 (HKT)</h1>
         <p id="headerSub">請在下方選擇隊員</p>
         <div class="remark">⚠️ *羽毛球*費於月尾計算</div>
     </div>
@@ -99,20 +84,16 @@
 
         <div class="pay-box" id="payBox" style="background: #fdfefe; border: 1px solid #e1e8ed; padding: 16px; display: none;">
             <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #444;">📲 選擇付款方式</p>
-            
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button class="pay-btn" style="background: #ff4d4d; margin: 0;" onclick="navigator.clipboard.writeText('61866188'); alert('📋 已成功複製轉賬號碼：61866188！\n方便你隨時開啟銀行 App 進行轉賬。')">
                     轉賬至 FPS (一鍵複製號碼)
                 </button>
-                
                 <button class="pay-btn" style="background: #e71d36; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
                     使用 PayMe 付款 (自動複製金額)
                 </button>
-                
                 <button class="pay-btn" style="background: #00a4e4; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 Alipay，進入後直接貼上金額即可。'); window.open('https://qr.alipay.hk/281004010496IPnb5AYmN49jpe8Zkbb48dyG', '_blank')">
                     使用 Alipay 付款 (自動複製金額)
                 </button>
-
                 <button class="pay-btn" style="background: #25D366; margin: 0;" onclick="sendWhatsAppNotification()">
                     WhatsApp 收款人 (已付複製金額)
                 </button>
@@ -122,8 +103,8 @@
 </div>
 
 <script>
-// 🌟 這裡已成功替換為你提供的新群組 Google Sheet 連結
-const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLj4-wh2m0pKLMpHTPclf3G1WCK354hO0J4yqMWnb9CHU2KhVm4-YHH5nc8qWhtJgGiOTFxKCkxchY/pubhtml';
+// 🌟 已更新為新的 HKT 試算表 ID 網址
+const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1v1-zeU3Yuj9WNcVsLTKNBsqssNLqiqtFHIS9RI1jmYVME/pubhtml';
 
 let globalData = {
     sessions: [],
@@ -172,25 +153,33 @@ async function initApp() {
     try {
         const csvBaseUrl = BASE_PUBLISH_URL.replace('/pubhtml', '/pub?output=csv');
         
-        // 讀取 Settings
-        const resSettings = await fetch(`${csvBaseUrl}&gid=2024390252`);
+        // 1. 讀取 Settings 分頁 (使用新試算表對應的 gid)
+        const resSettings = await fetch(`${csvBaseUrl}&gid=777656204`);
         const textSettings = await resSettings.text();
         const arrSettings = csvToArray(textSettings);
         
         globalData.settingsHeaders = arrSettings[0].map(h => h ? h.trim() : "");
         
+        const nameIdx = globalData.settingsHeaders.indexOf("Name");
+        const empIdx = globalData.settingsHeaders.indexOf("Employee");
+        const guestIdx = globalData.settingsHeaders.indexOf("Guess");
+        const monthIdx = globalData.settingsHeaders.indexOf("Month");
+        const shuttleFeeIdx = globalData.settingsHeaders.indexOf("Total_Shuttlecock_Fee");
+
         let lastSeenMonth = ""; 
         
         arrSettings.forEach((row, index) => {
             if (index === 0) return; 
             
-            let mCol = row[0] ? row[0].trim() : "";
-            let feeCol = row[1] ? row[1].trim() : "";
-            let nameCol = row[3] ? row[3].trim() : "";
-            let empCol = row[4] ? row[4].trim().toUpperCase() : "";
-            let gstCol = row[5] ? row[5].trim().toUpperCase() : "";
+            let mCol = (monthIdx !== -1 && row[monthIdx]) ? row[monthIdx].trim() : "";
+            let feeCol = (shuttleFeeIdx !== -1 && row[shuttleFeeIdx]) ? row[shuttleFeeIdx].trim() : "";
+            let nameCol = (nameIdx !== -1 && row[nameIdx]) ? row[nameIdx].trim() : "";
+            let empCol = (empIdx !== -1 && row[empIdx]) ? row[empIdx].trim().toUpperCase() : "";
+            let gstCol = (guestIdx !== -1 && row[guestIdx]) ? row[guestIdx].trim().toUpperCase() : "";
             
             if (mCol !== "" && !mCol.includes("function") && !mCol.includes("Object")) {
+                // 相容可能被省略年份的輸入
+                if(mCol.length === 2) mCol = "Jun-2026"; 
                 lastSeenMonth = mCol;
                 globalData.monthlyShuttle[lastSeenMonth] = parseFloat(feeCol) || 0;
             }
@@ -204,7 +193,7 @@ async function initApp() {
             }
         });
 
-        // 讀取 Sessions
+        // 2. 讀取 Sessions 分頁 (通常預設第一頁為 gid=0)
         const resSessions = await fetch(`${csvBaseUrl}&gid=0`);
         const textSessions = await resSessions.text();
         const arrSessions = csvToArray(textSessions);
@@ -239,38 +228,32 @@ async function initApp() {
         renderBill(); 
 
     } catch (error) {
-        document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保試算表已發佈！<br>錯誤詳情: ${error}`;
+        document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保 HKT 試算表已發佈到網路！<br>錯誤詳情: ${error}`;
     }
 }
 
 function initSelectors() {
     const monthSelect = document.getElementById('monthSelect');
     monthSelect.innerHTML = "";
-    
     let mBlank = document.createElement('option');
-    mBlank.value = "-";
-    mBlank.innerHTML = "-";
+    mBlank.value = "-"; mBlank.innerHTML = "-";
     monthSelect.appendChild(mBlank);
     
     Object.keys(globalData.monthlyShuttle).forEach(m => {
         let opt = document.createElement('option');
-        opt.value = m;
-        opt.innerHTML = m;
+        opt.value = m; opt.innerHTML = m;
         monthSelect.appendChild(opt);
     });
 
     const memberSelect = document.getElementById('memberSelect');
     memberSelect.innerHTML = "";
-    
     let memBlank = document.createElement('option');
-    memBlank.value = "-";
-    memBlank.innerHTML = "-";
+    memBlank.value = "-"; memBlank.innerHTML = "-";
     memberSelect.appendChild(memBlank);
     
     Object.keys(globalData.members).forEach(name => {
         let opt = document.createElement('option');
-        opt.value = name;
-        opt.innerHTML = name;
+        opt.value = name; opt.innerHTML = name;
         memberSelect.appendChild(opt);
     });
 }
@@ -299,7 +282,6 @@ function renderBill() {
     }
 
     const memberConfig = globalData.members[currentName];
-
     const targetHeaderName = `Paid_${selectedMonth}`;
     const paidColumnIndex = globalData.settingsHeaders.indexOf(targetHeaderName);
     
@@ -331,7 +313,6 @@ function renderBill() {
     monthlySessions.forEach(session => {
         if (session.attendees.includes(currentName)) {
             totalSessionsAttended++;
-            
             const courtShare = session.bookingFee / session.attendees.length;
             
             let shuttleShare = 0;
@@ -406,7 +387,6 @@ function renderBill() {
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
         payBox.style.display = "block";
-        
         if(totalNeedToPay > 0) {
             copyAmtBtn.style.display = "block";
         } else {
