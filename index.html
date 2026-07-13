@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽毛球結算表 (新群組)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: #f5f7fb; color: #333; padding: 12px; display: flex; justify-content: center; }
+        .app-container { width: 100%; max-width: 450px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; display: none; }
+        .loading { padding: 40px; text-align: center; font-size: 16px; color: #666; font-weight: bold; }
+        
+        /* Header */
+        .header { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 24px 16px; text-align: center; }
+        .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        .header .remark { font-size: 12px; color: #ffeaa7; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
+        
+        /* 篩選切換 */
+        .selector-box { padding: 12px 16px; border-bottom: 1px solid #eee; background: #fafafa; display: flex; gap: 10px; }
+        .select-group { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .select-group label { font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; }
+        select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; background: white; width: 100%; }
+
+        .main-content { padding: 16px; }
+        
+        /* 總數卡片 */
+        .summary-card { background: #fff5f5; border: 1px solid #ffe3e3; border-left: 6px solid #ff4d4d; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; transition: all 0.3s ease; }
+        .summary-card.is-paid { background: #f4fbf7; border: 1px solid #d1f2e1; border-left: 6px solid #27ae60; }
+        .total-label { font-size: 14px; color: #666; font-weight: 500; }
+        .total-amount-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .total-amount { font-size: 32px; font-weight: bold; color: #ff4d4d; line-height: 1.1; }
+        .summary-card.is-paid .total-amount { color: #27ae60; }
+        .status-badge { color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-top: 4px; }
+        .status-badge.unpaid { background: #ff4d4d; }
+        .status-badge.paid { background: #27ae60; }
+
+        /* 📋 複製金額按鈕樣式 */
+        .copy-amt-btn { background: rgba(0,0,0,0.05); color: #555; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: background 0.2s; }
+        .copy-amt-btn:hover { background: rgba(0,0,0,0.1); }
+
+        /* 列表標題 */
+        .section-title { font-size: 15px; color: #666; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; }
+        
+        /* 每場活動明細 */
+        .card-list { display: flex; flex-direction: column; gap: 12px; }
+        .session-card { background: #fff; border: 1px solid #eaeaea; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
+        .card-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #11998e; margin-bottom: 8px; border-bottom: 1px solid #f5f5f5; padding-bottom: 6px; }
+        .card-body { font-size: 13px; color: #555; line-height: 1.6; }
+        .row-detail { display: flex; justify-content: space-between; margin-top: 2px; }
+        .row-detail.sub { color: #888; font-size: 12px; padding-left: 10px; }
+        .row-total { display: flex; justify-content: space-between; font-weight: bold; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #ddd; color: #333; }
+
+        /* 付款按鈕 */
+        .pay-box { background: #eef9ff; border: 1px solid #cfe9ff; border-radius: 12px; padding: 14px; margin-top: 20px; text-align: center; font-size: 13px; }
+        .pay-btn { background: #11998e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 8px; font-size: 14px; cursor: pointer; display: block; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div id="loading" class="loading">📡 正在實時連線 Google Sheet 讀取最新數據...</div>
+
+<div class="app-container" id="app">
+    <div class="header">
+        <h1>🏸 羽毛球費用查閱系統</h1>
+        <p id="headerSub">請在下方選擇隊員</p>
+        <div class="remark">⚠️ *羽毛球*費於月尾計算</div>
+    </div>
+
+    <div class="selector-box">
+        <div class="select-group">
+            <label>📅 選擇月份</label>
+            <select id="monthSelect" onchange="renderBill()"></select>
+        </div>
+        <div class="select-group">
+            <label>👤 選擇隊員</label>
+            <select id="memberSelect" onchange="renderBill()"></select>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="summary-card" id="summaryCard">
+            <div>
+                <span class="total-label">本月應付總額</span><br>
+                <span id="statusBadge" class="status-badge unpaid">🔴 未付款</span>
+            </div>
+            <div class="total-amount-box">
+                <span class="total-amount" id="totalAmount">$0.00</span>
+                <button class="copy-amt-btn" id="copyAmtBtn" onclick="copyCurrentAmount()" style="display: none;">📋 複製金額</button>
+            </div>
+        </div>
+
+        <div class="section-title">
+            <span>📅 出席及分攤明細</span>
+            <span id="attendanceCount" style="color:#11998e; font-weight:normal; font-size:13px;"></span>
+        </div>
+
+        <div class="card-list" id="sessionList"></div>
+
+        <div class="pay-box" id="payBox" style="background: #fdfefe; border: 1px solid #e1e8ed; padding: 16px; display: none;">
+            <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #444;">📲 選擇付款方式</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="pay-btn" style="background: #ff4d4d; margin: 0;" onclick="navigator.clipboard.writeText('61866188'); alert('📋 已成功複製轉賬號碼：61866188！\n方便你隨時開啟銀行 App 進行轉賬。')">
+                    轉賬至 FPS (一鍵複製號碼)
+                </button>
+                
+                <button class="pay-btn" style="background: #e71d36; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
+                    使用 PayMe 付款 (自動複製金額)
+                </button>
+                
+                <button class="pay-btn" style="background: #00a4e4; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 Alipay，進入後直接貼上金額即可。'); window.open('https://qr.alipay.hk/281004010496IPnb5AYmN49jpe8Zkbb48dyG', '_blank')">
+                    使用 Alipay 付款 (自動複製金額)
+                </button>
+
+                <button class="pay-btn" style="background: #25D366; margin: 0;" onclick="sendWhatsAppNotification()">
+                    WhatsApp 收款人 (已付複製金額)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 🌟 這裡已成功替換為你提供的新群組 Google Sheet 連結
+const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLj4-wh2m0pKLMpHTPclf3G1WCK354hO0J4yqMWnb9CHU2KhVm4-YHH5nc8qWhtJgGiOTFxKCkxchY/pubhtml';
+
+let globalData = {
+    sessions: [],
+    monthlyShuttle: {}, 
+    members: {},
+    settingsHeaders: [] 
+};
+
+function csvToArray(text) {
+    let p = '', r = [];
+    let q = false;
+    let row = [''];
+    for (let i=0; i<text.length; i++) {
+        let c = text[i];
+        if (c === '"') { q = !q; continue; }
+        if (!q && c === ',') { row.push(''); continue; }
+        if (!q && (c === '\r' || c === '\n')) {
+            if (c === '\n' && p === '\r') { p = c; continue; }
+            r.push(row); row = ['']; p = c; continue;
+        }
+        row[row.length-1] += c;
+        p = c;
+    }
+    if (row.length > 1 || row[0] !== '') r.push(row);
+    return r;
+}
+
+function copyCurrentAmount() {
+    const amtText = document.getElementById('totalAmount').innerText.replace('$', '').trim();
+    if(amtText && amtText !== "0.00") {
+        navigator.clipboard.writeText(amtText);
+        alert(`📋 已成功複製應付金額：$${amtText}`);
+    }
+}
+
+function sendWhatsAppNotification() {
+    const amtText = document.getElementById('totalAmount').innerText.replace('$', '').trim();
+    if(amtText && amtText !== "0.00") {
+        const message = `已付$${amtText}`;
+        const whatsappUrl = `https://api.whatsapp.com/send?phone=85261866188&text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+}
+
+async function initApp() {
+    try {
+        const csvBaseUrl = BASE_PUBLISH_URL.replace('/pubhtml', '/pub?output=csv');
+        
+        // 讀取 Settings
+        const resSettings = await fetch(`${csvBaseUrl}&gid=2024390252`);
+        const textSettings = await resSettings.text();
+        const arrSettings = csvToArray(textSettings);
+        
+        globalData.settingsHeaders = arrSettings[0].map(h => h ? h.trim() : "");
+        
+        let lastSeenMonth = ""; 
+        
+        arrSettings.forEach((row, index) => {
+            if (index === 0) return; 
+            
+            let mCol = row[0] ? row[0].trim() : "";
+            let feeCol = row[1] ? row[1].trim() : "";
+            let nameCol = row[3] ? row[3].trim() : "";
+            let empCol = row[4] ? row[4].trim().toUpperCase() : "";
+            let gstCol = row[5] ? row[5].trim().toUpperCase() : "";
+            
+            if (mCol !== "" && !mCol.includes("function") && !mCol.includes("Object")) {
+                lastSeenMonth = mCol;
+                globalData.monthlyShuttle[lastSeenMonth] = parseFloat(feeCol) || 0;
+            }
+            
+            if (nameCol !== "" && !nameCol.includes("function") && !nameCol.includes("Object")) {
+                globalData.members[nameCol] = {
+                    isEmployee: empCol === 'TRUE',
+                    isGuest: gstCol === 'TRUE',
+                    rawRowData: row 
+                };
+            }
+        });
+
+        // 讀取 Sessions
+        const resSessions = await fetch(`${csvBaseUrl}&gid=0`);
+        const textSessions = await resSessions.text();
+        const arrSessions = csvToArray(textSessions);
+        
+        const headers = arrSessions[0].map(h => h ? h.trim() : "");
+        
+        for(let i=1; i<arrSessions.length; i++) {
+            const row = arrSessions[i];
+            if(!row[0] || row[0].trim() === "" || row[0].includes("function")) continue;
+            
+            let session = {
+                date: row[0].trim(),
+                bookingFee: parseFloat(row[1]) || 0,
+                useShuttle: row[2] ? row[2].trim().toUpperCase() === 'TRUE' : false,
+                guessFee: parseFloat(row[3]) || 0,
+                attendees: []
+            };
+            
+            for(let j=4; j<headers.length; j++) {
+                if(row[j] && row[j].trim() === '1' && headers[j] && !headers[j].includes("function")) {
+                    session.attendees.push(headers[j]);
+                }
+            }
+            globalData.sessions.push(session);
+        }
+
+        initSelectors();
+        
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        
+        renderBill(); 
+
+    } catch (error) {
+        document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保試算表已發佈！<br>錯誤詳情: ${error}`;
+    }
+}
+
+function initSelectors() {
+    const monthSelect = document.getElementById('monthSelect');
+    monthSelect.innerHTML = "";
+    
+    let mBlank = document.createElement('option');
+    mBlank.value = "-";
+    mBlank.innerHTML = "-";
+    monthSelect.appendChild(mBlank);
+    
+    Object.keys(globalData.monthlyShuttle).forEach(m => {
+        let opt = document.createElement('option');
+        opt.value = m;
+        opt.innerHTML = m;
+        monthSelect.appendChild(opt);
+    });
+
+    const memberSelect = document.getElementById('memberSelect');
+    memberSelect.innerHTML = "";
+    
+    let memBlank = document.createElement('option');
+    memBlank.value = "-";
+    memBlank.innerHTML = "-";
+    memberSelect.appendChild(memBlank);
+    
+    Object.keys(globalData.members).forEach(name => {
+        let opt = document.createElement('option');
+        opt.value = name;
+        opt.innerHTML = name;
+        memberSelect.appendChild(opt);
+    });
+}
+
+function renderBill() {
+    const selectedMonth = document.getElementById('monthSelect').value; 
+    const currentName = document.getElementById('memberSelect').value;
+    
+    const summaryCard = document.getElementById('summaryCard');
+    const statusBadge = document.getElementById('statusBadge');
+    const payBox = document.getElementById('payBox');
+    const copyAmtBtn = document.getElementById('copyAmtBtn');
+    
+    if (selectedMonth === "-" || currentName === "-") {
+        document.getElementById('totalAmount').innerHTML = "$0.00";
+        document.getElementById('attendanceCount').innerHTML = "";
+        document.getElementById('sessionList').innerHTML = `<div style="text-align:center;color:#999;padding:40px;">請選擇月份及隊員名稱以查閱明細</div>`;
+        document.getElementById('headerSub').innerHTML = "請選擇月份與隊員";
+        
+        summaryCard.classList.remove('is-paid');
+        statusBadge.innerHTML = "🔴 未付款";
+        statusBadge.className = "status-badge unpaid";
+        payBox.style.display = "none";
+        copyAmtBtn.style.display = "none"; 
+        return;
+    }
+
+    const memberConfig = globalData.members[currentName];
+
+    const targetHeaderName = `Paid_${selectedMonth}`;
+    const paidColumnIndex = globalData.settingsHeaders.indexOf(targetHeaderName);
+    
+    let isPaid = false;
+    if (paidColumnIndex !== -1 && memberConfig.rawRowData[paidColumnIndex]) {
+        isPaid = memberConfig.rawRowData[paidColumnIndex].trim().toUpperCase() === 'TRUE';
+    }
+
+    let dateKeywordShort = selectedMonth; 
+    if (selectedMonth.includes('-')) {
+        const parts = selectedMonth.split('-'); 
+        if (parts.length === 2 && isNaN(parts[0])) { 
+            dateKeywordShort = `${parts[0]}-${parts[1].substring(2)}`; 
+        }
+    }
+
+    const totalShuttleFee = globalData.monthlyShuttle[selectedMonth] || 0;
+    const monthlySessions = globalData.sessions.filter(s => 
+        s.date.toLowerCase().includes(dateKeywordShort.toLowerCase())
+    );
+    
+    const shuttleSessionsCount = monthlySessions.filter(s => s.useShuttle).length;
+    const shuttleFeePerSession = shuttleSessionsCount > 0 ? (totalShuttleFee / shuttleSessionsCount) : 0;
+
+    let totalNeedToPay = 0;
+    let totalSessionsAttended = 0;
+    let html = "";
+
+    monthlySessions.forEach(session => {
+        if (session.attendees.includes(currentName)) {
+            totalSessionsAttended++;
+            
+            const courtShare = session.bookingFee / session.attendees.length;
+            
+            let shuttleShare = 0;
+            if (session.useShuttle && session.attendees.length > 0) {
+                shuttleShare = shuttleFeePerSession / session.attendees.length;
+            }
+            
+            let guessShare = 0;
+            if (memberConfig.isGuest) {
+                guessShare = 10.00;
+            }
+            
+            const sessionTotal = courtShare + shuttleShare + guessShare;
+            totalNeedToPay += sessionTotal;
+            
+            html += `
+                <div class="session-card">
+                    <div class="card-header">
+                        <span>📅 ${session.date}</span>
+                        <span style="color:#27ae60;">✔ 已出席</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="color:#888; font-size:12px; margin-bottom:4px;">當日出席 (${session.attendees.length}人): ${session.attendees.join(", ")}</div>
+                        <div class="row-detail">
+                            <span>• 場地費分攤 ($${session.bookingFee.toFixed(2)} ÷ ${session.attendees.length}人)</span>
+                            <span>$${courtShare.toFixed(2)}</span>
+                        </div>
+            `;
+            
+            if (session.useShuttle) {
+                html += `
+                    <div class="row-detail">
+                        <span>• 羽毛球分攤</span>
+                        <span>$${shuttleShare.toFixed(2)}</span>
+                    </div>
+                    <div class="row-detail sub">($${shuttleFeePerSession.toFixed(2)} ÷ 當日 ${session.attendees.length} 人)</div>
+                `;
+            }
+            
+            if (guessShare > 0) {
+                html += `
+                    <div class="row-detail" style="color:#e74c3c; font-weight:500;">
+                        <span>• Guess Fee</span>
+                        <span>$${guessShare.toFixed(2)}</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                        <div class="row-total">
+                            <span>單日小計:</span>
+                            <span>$${sessionTotal.toFixed(2)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    document.getElementById('totalAmount').innerHTML = `$${totalNeedToPay.toFixed(2)}`;
+    document.getElementById('attendanceCount').innerHTML = `本月出席 ${totalSessionsAttended} 場`;
+    document.getElementById('sessionList').innerHTML = html || `<div style="text-align:center;color:#999;padding:40px;">本月此隊員無出席記錄</div>`;
+    
+    if (isPaid) {
+        summaryCard.classList.add('is-paid');
+        statusBadge.innerHTML = "🟢 已付款";
+        statusBadge.className = "status-badge paid";
+        payBox.style.display = "none";
+        copyAmtBtn.style.display = "none"; 
+    } else {
+        summaryCard.classList.remove('is-paid');
+        statusBadge.innerHTML = "🔴 未付款";
+        statusBadge.className = "status-badge unpaid";
+        payBox.style.display = "block";
+        
+        if(totalNeedToPay > 0) {
+            copyAmtBtn.style.display = "block";
+        } else {
+            copyAmtBtn.style.display = "none";
+        }
+    }
+    
+    let identityText = memberConfig.isEmployee ? " (⭐內部員工)" : (memberConfig.isGuest ? " (👤客席嘉賓)" : "");
+    document.getElementById('headerSub').innerHTML = `${selectedMonth} 月結清單${identityText}`;
+}
+
+initApp();
+</script>
+</body>
+</html>
