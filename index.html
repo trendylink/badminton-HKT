@@ -9,22 +9,19 @@
         body { background-color: #f5f7fb; color: #333; padding: 12px; display: flex; justify-content: center; }
         .app-container { width: 100%; max-width: 450px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); overflow: hidden; display: none; }
         .loading { padding: 40px; text-align: center; font-size: 16px; color: #666; font-weight: bold; }
-        
-        /* Header */
+
         .header { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 24px 16px; text-align: center; }
         .header h1 { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
         .header p { font-size: 13px; opacity: 0.9; }
         .header .remark { font-size: 12px; color: #ffeaa7; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
-        
-        /* 篩選切換 */
+
         .selector-box { padding: 12px 16px; border-bottom: 1px solid #eee; background: #fafafa; display: flex; gap: 10px; }
         .select-group { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .select-group label { font-size: 11px; font-weight: bold; color: #888; text-transform: uppercase; }
         select { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; outline: none; background: white; width: 100%; }
 
         .main-content { padding: 16px; }
-        
-        /* 總數卡片 */
+
         .summary-card { background: #fff5f5; border: 1px solid #ffe3e3; border-left: 6px solid #ff4d4d; padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; transition: all 0.3s ease; }
         .summary-card.is-paid { background: #f4fbf7; border: 1px solid #d1f2e1; border-left: 6px solid #27ae60; }
         .total-label { font-size: 14px; color: #666; font-weight: 500; }
@@ -35,14 +32,11 @@
         .status-badge.unpaid { background: #ff4d4d; }
         .status-badge.paid { background: #27ae60; }
 
-        /* 📋 複製金額按鈕樣式 */
         .copy-amt-btn { background: rgba(0,0,0,0.05); color: #555; border: none; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 2px; transition: background 0.2s; }
         .copy-amt-btn:hover { background: rgba(0,0,0,0.1); }
 
-        /* 列表標題 */
         .section-title { font-size: 15px; color: #666; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; }
-        
-        /* 每場活動明細 */
+
         .card-list { display: flex; flex-direction: column; gap: 12px; }
         .session-card { background: #fff; border: 1px solid #eaeaea; border-radius: 12px; padding: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.01); }
         .card-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; color: #11998e; margin-bottom: 8px; border-bottom: 1px solid #f5f5f5; padding-bottom: 6px; }
@@ -51,14 +45,35 @@
         .row-detail.sub { color: #888; font-size: 12px; padding-left: 10px; }
         .row-total { display: flex; justify-content: space-between; font-weight: bold; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #ddd; color: #333; }
 
-        /* 付款按鈕 */
-        .pay-box { background: #eef9ff; border: 1px solid #cfe9ff; border-radius: 12px; padding: 14px; margin-top: 20px; text-align: center; font-size: 13px; }
-        .pay-btn { background: #11998e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 8px; font-size: 14px; cursor: pointer; display: block; text-decoration: none; }
+        /* ===== 付款方式區塊 (原版風格) ===== */
+        .pay-box { background: #fdfefe; border: 1px solid #e1e8ed; border-radius: 12px; padding: 16px; margin-top: 20px; text-align: center; }
+        .pay-box .pay-title { font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #444; }
+        .pay-btn { background: #11998e; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; display: block; text-decoration: none; transition: opacity 0.2s; }
+        .pay-btn:hover { opacity: 0.9; }
+        .pay-btn + .pay-btn { margin-top: 8px; }
+        .pay-btn.fps { background: #ff4d4d; }
+        .pay-btn.payme { background: #e71d36; }
+        .pay-btn.alipay { background: #00a4e4; }
+
+        /* ===== WhatsApp 通知區塊 (獨立樣式) ===== */
+        .whatsapp-box { background: #f8fdfa; border: 1px solid #d4e8e0; border-radius: 14px; padding: 18px 16px 20px; margin-top: 16px; text-align: center; }
+        .whatsapp-box .whatsapp-header { font-size: 15px; font-weight: 700; color: #1a7a6a; margin-bottom: 12px; letter-spacing: 0.3px; }
+        .whatsapp-box .whatsapp-header span { font-size: 18px; }
+
+        .whatsapp-btn { background: #25d366; color: #fff; border: none; width: 100%; padding: 14px 12px; border-radius: 10px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s, transform 0.1s; box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25); }
+        .whatsapp-btn:hover { background: #1ebe5c; }
+        .whatsapp-btn:active { transform: scale(0.97); }
+        .whatsapp-btn .wa-icon { font-size: 20px; }
+        .whatsapp-btn .amt-badge { background: rgba(255, 255, 255, 0.2); padding: 2px 10px; border-radius: 20px; font-size: 14px; margin-left: 2px; }
+
+        .pay-note { font-size: 12px; color: #888; margin-top: 10px; letter-spacing: 0.2px; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="loading" class="loading">📡 正在實時連線 Google Sheet 讀取最新數據...</div>
+<div id="loading" class="loading">📡 正在實時連線 Google Sheet 讀取最新數據…</div>
 
 <div class="app-container" id="app">
     <div class="header">
@@ -97,42 +112,52 @@
 
         <div class="card-list" id="sessionList"></div>
 
-        <div class="pay-box" id="payBox" style="background: #fdfefe; border: 1px solid #e1e8ed; padding: 16px; display: none;">
-            <p style="font-size: 14px; font-weight: bold; margin-bottom: 12px; color: #444;">📲 選擇付款方式</p>
-            
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button class="pay-btn" style="background: #ff4d4d; margin: 0;" onclick="navigator.clipboard.writeText('61866188'); alert('📋 已成功複製轉賬號碼：61866188！\n方便你隨時開啟銀行 App 進行轉賬。')">
+        <!-- ─── 選擇付款方式 ─── -->
+        <div class="pay-box hidden" id="payBox">
+            <div class="pay-title">📲 選擇付款方式</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="pay-btn fps" onclick="navigator.clipboard.writeText('61866188'); alert('📋 已成功複製轉賬號碼：61866188！\n方便你隨時開啟銀行 App 進行轉賬。')">
                     轉賬至 FPS (一鍵複製號碼)
                 </button>
-                
-                <button class="pay-btn" style="background: #e71d36; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
+                <button class="pay-btn payme" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
                     使用 PayMe 付款 (自動複製金額)
                 </button>
-                
-                <button class="pay-btn" style="background: #00a4e4; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 Alipay，進入後直接貼上金額即可。'); window.open('https://qr.alipay.hk/281004010496IPnb5AYmN49jpe8Zkbb48dyG', '_blank')">
+                <button class="pay-btn alipay" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 Alipay，進入後直接貼上金額即可。'); window.open('https://qr.alipay.hk/281004010496IPnb5AYmN49jpe8Zkbb48dyG', '_blank')">
                     使用 Alipay 付款 (自動複製金額)
                 </button>
             </div>
         </div>
 
-        <div id="whatsappBox" style="background: #f4fbf7; border: 1px solid #d1f2e1; border-radius: 12px; padding: 16px; margin-top: 14px; text-align: center; display: none;">
-            <p style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #27ae60;">👍 付款後請通知收款人確認</p>
-            <button class="pay-btn" style="background: #25D366; margin: 0;" onclick="sendWhatsAppNotification()">
-                💬 WhatsApp 通知收款人 (自動帶入已付金額)
+        <!-- ─── WhatsApp 通知區塊（付款後通知） ─── -->
+        <div class="whatsapp-box hidden" id="whatsappBox">
+            <div class="whatsapp-header">
+                <span>👍</span> 付款後請通知收款人確認
+            </div>
+            <button class="whatsapp-btn" id="whatsappBtn">
+                <span class="wa-icon">💬</span>
+                WhatsApp 通知收款人
+                <span class="amt-badge" id="whatsappAmtBadge">已付 $0.00</span>
             </button>
+            <div class="pay-note">✦ 按鈕會自動帶入應付金額，點擊即開啟 WhatsApp ✦</div>
         </div>
 
     </div>
 </div>
 
 <script>
+// ============================================================
+//  收款人 WhatsApp 號碼（香港）
+// ============================================================
+const WHATSAPP_NUMBER = '85261866188';
+
+// ============================================================
 const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLj4-wh2m0pKLMpHTPclf3G1WCK354hO0J4yqMWnb9CHU2KhVm4-YHH5nc8qWhtJgGiOTFxKCkxchY/pubhtml';
 
 let globalData = {
     sessions: [],
-    monthlyShuttle: {}, 
+    monthlyShuttle: {},
     members: {},
-    settingsHeaders: [] 
+    settingsHeaders: []
 };
 
 function csvToArray(text) {
@@ -162,27 +187,18 @@ function copyCurrentAmount() {
     }
 }
 
-function sendWhatsAppNotification() {
-    const amtText = document.getElementById('totalAmount').innerText.replace('$', '').trim();
-    if(amtText && amtText !== "0.00") {
-        const message = `已付$${amtText}`;
-        const whatsappUrl = `https://api.whatsapp.com/send?phone=85261866188&text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-    }
-}
-
 async function initApp() {
     try {
         const csvBaseUrl = BASE_PUBLISH_URL.replace('/pubhtml', '/pub?output=csv');
-        
+
         // 讀取 Settings 分頁
         const resSettings = await fetch(`${csvBaseUrl}&gid=777656204`);
         const textSettings = await resSettings.text();
         const arrSettings = csvToArray(textSettings);
-        
+
         const cleanHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim().toLowerCase() : "");
         globalData.settingsHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim() : "");
-        
+
         let monthIdx = cleanHeaders.findIndex(h => h !== "" && h.includes("month"));
         let shuttleFeeIdx = cleanHeaders.findIndex(h => h !== "" && (h.includes("shuttlecock") || h.includes("fee")));
         let nameIdx = cleanHeaders.findIndex(h => h !== "" && h === "name");
@@ -191,31 +207,31 @@ async function initApp() {
 
         if (monthIdx === -1) monthIdx = 0;
         if (shuttleFeeIdx === -1) shuttleFeeIdx = 1;
-        if (nameIdx === -1) nameIdx = 3; 
+        if (nameIdx === -1) nameIdx = 3;
         if (empIdx === -1) empIdx = 4;
         if (guestIdx === -1) guestIdx = 5;
 
-        let lastSeenMonth = ""; 
-        
+        let lastSeenMonth = "";
+
         arrSettings.forEach((row, index) => {
-            if (index === 0) return; 
-            
+            if (index === 0) return;
+
             let mCol = row[monthIdx] ? row[monthIdx].trim() : "";
             let feeCol = row[shuttleFeeIdx] ? row[shuttleFeeIdx].trim() : "";
             let nameCol = row[nameIdx] ? row[nameIdx].trim() : "";
             let empCol = row[empIdx] ? row[empIdx].trim().toUpperCase() : "";
             let gstCol = row[guestIdx] ? row[guestIdx].trim().toUpperCase() : "";
-            
+
             if (mCol !== "" && !mCol.includes("<html") && !mCol.includes("function")) {
                 lastSeenMonth = mCol;
                 globalData.monthlyShuttle[lastSeenMonth] = parseFloat(feeCol) || 0;
             }
-            
+
             if (nameCol !== "" && !nameCol.includes("<html") && !nameCol.includes("function")) {
                 globalData.members[nameCol] = {
                     isEmployee: empCol === 'TRUE',
                     isGuest: gstCol === 'TRUE',
-                    rawRowData: row 
+                    rawRowData: row
                 };
             }
         });
@@ -224,13 +240,13 @@ async function initApp() {
         const resSessions = await fetch(`${csvBaseUrl}&gid=0`);
         const textSessions = await resSessions.text();
         const arrSessions = csvToArray(textSessions);
-        
+
         const rawSessionsHeaders = arrSessions[0].map(h => h ? h.replace(/^\uFEFF/, '').trim() : "");
-        
+
         for(let i=1; i<arrSessions.length; i++) {
             const row = arrSessions[i];
             if(!row[0] || row[0].trim() === "" || row[0].includes("<html")) continue;
-            
+
             let session = {
                 date: row[0].trim(),
                 bookingFee: parseFloat(row[1]) || 0,
@@ -238,7 +254,7 @@ async function initApp() {
                 guessFee: parseFloat(row[3]) || 0,
                 attendees: []
             };
-            
+
             for(let j=4; j<rawSessionsHeaders.length; j++) {
                 if(row[j] && row[j].trim() === '1' && rawSessionsHeaders[j]) {
                     session.attendees.push(rawSessionsHeaders[j]);
@@ -248,11 +264,11 @@ async function initApp() {
         }
 
         initSelectors();
-        
+
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
-        
-        renderBill(); 
+
+        renderBill();
 
     } catch (error) {
         document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保試算表已發佈！<br>錯誤詳情: ${error}`;
@@ -262,12 +278,12 @@ async function initApp() {
 function initSelectors() {
     const monthSelect = document.getElementById('monthSelect');
     monthSelect.innerHTML = "";
-    
+
     let mBlank = document.createElement('option');
     mBlank.value = "-";
     mBlank.innerHTML = "-";
     monthSelect.appendChild(mBlank);
-    
+
     Object.keys(globalData.monthlyShuttle).forEach(m => {
         let opt = document.createElement('option');
         opt.value = m;
@@ -277,12 +293,12 @@ function initSelectors() {
 
     const memberSelect = document.getElementById('memberSelect');
     memberSelect.innerHTML = "";
-    
+
     let memBlank = document.createElement('option');
     memBlank.value = "-";
     memBlank.innerHTML = "-";
     memberSelect.appendChild(memBlank);
-    
+
     Object.keys(globalData.members).forEach(name => {
         let opt = document.createElement('option');
         opt.value = name;
@@ -292,27 +308,28 @@ function initSelectors() {
 }
 
 function renderBill() {
-    const selectedMonth = document.getElementById('monthSelect').value; 
+    const selectedMonth = document.getElementById('monthSelect').value;
     const currentName = document.getElementById('memberSelect').value;
-    
+
     const summaryCard = document.getElementById('summaryCard');
     const statusBadge = document.getElementById('statusBadge');
     const payBox = document.getElementById('payBox');
     const whatsappBox = document.getElementById('whatsappBox');
     const copyAmtBtn = document.getElementById('copyAmtBtn');
-    
+    const totalEl = document.getElementById('totalAmount');
+
     if (selectedMonth === "-" || currentName === "-") {
-        document.getElementById('totalAmount').innerHTML = "$0.00";
+        totalEl.innerHTML = "$0.00";
         document.getElementById('attendanceCount').innerHTML = "";
         document.getElementById('sessionList').innerHTML = `<div style="text-align:center;color:#999;padding:40px;">請選擇月份及隊員名稱以查閱明細</div>`;
         document.getElementById('headerSub').innerHTML = "請選擇月份與隊員";
-        
+
         summaryCard.classList.remove('is-paid');
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
-        payBox.style.display = "none";
-        whatsappBox.style.display = "none";
-        copyAmtBtn.style.display = "none"; 
+        payBox.classList.add('hidden');
+        whatsappBox.classList.add('hidden');
+        copyAmtBtn.style.display = "none";
         return;
     }
 
@@ -320,19 +337,19 @@ function renderBill() {
 
     const targetHeaderName = `Paid_${selectedMonth}`;
     const paidColumnIndex = globalData.settingsHeaders.findIndex(h => h.replace(/^\uFEFF/, '').trim().toLowerCase() === targetHeaderName.toLowerCase());
-    
+
     let isPaid = false;
     if (paidColumnIndex !== -1 && memberConfig.rawRowData[paidColumnIndex]) {
         isPaid = memberConfig.rawRowData[paidColumnIndex].trim().toUpperCase() === 'TRUE';
     }
 
-    let dateKeywordShort = selectedMonth; 
+    let dateKeywordShort = selectedMonth;
 
     const totalShuttleFee = globalData.monthlyShuttle[selectedMonth] || 0;
-    const monthlySessions = globalData.sessions.filter(s => 
+    const monthlySessions = globalData.sessions.filter(s =>
         s.date.toLowerCase().includes(dateKeywordShort.toLowerCase())
     );
-    
+
     const shuttleSessionsCount = monthlySessions.filter(s => s.useShuttle).length;
     const shuttleFeePerSession = shuttleSessionsCount > 0 ? (totalShuttleFee / shuttleSessionsCount) : 0;
 
@@ -343,22 +360,22 @@ function renderBill() {
     monthlySessions.forEach(session => {
         if (session.attendees.includes(currentName)) {
             totalSessionsAttended++;
-            
+
             const courtShare = session.bookingFee / session.attendees.length;
-            
+
             let shuttleShare = 0;
             if (session.useShuttle && session.attendees.length > 0) {
                 shuttleShare = shuttleFeePerSession / session.attendees.length;
             }
-            
+
             let guessShare = 0;
             if (memberConfig.isGuest) {
                 guessShare = 10.00;
             }
-            
+
             const sessionTotal = courtShare + shuttleShare + guessShare;
             totalNeedToPay += sessionTotal;
-            
+
             html += `
                 <div class="session-card">
                     <div class="card-header">
@@ -372,7 +389,7 @@ function renderBill() {
                             <span>$${courtShare.toFixed(2)}</span>
                         </div>
             `;
-            
+
             if (session.useShuttle) {
                 html += `
                     <div class="row-detail">
@@ -382,7 +399,7 @@ function renderBill() {
                     <div class="row-detail sub">($${shuttleFeePerSession.toFixed(2)} ÷ 當日 ${session.attendees.length} 人)</div>
                 `;
             }
-            
+
             if (guessShare > 0) {
                 html += `
                     <div class="row-detail" style="color:#e74c3c; font-weight:500;">
@@ -391,7 +408,7 @@ function renderBill() {
                     </div>
                 `;
             }
-            
+
             html += `
                         <div class="row-total">
                             <span>單日小計:</span>
@@ -403,33 +420,59 @@ function renderBill() {
         }
     });
 
-    document.getElementById('totalAmount').innerHTML = `$${totalNeedToPay.toFixed(2)}`;
+    totalEl.innerHTML = `$${totalNeedToPay.toFixed(2)}`;
     document.getElementById('attendanceCount').innerHTML = `本月出席 ${totalSessionsAttended} 場`;
     document.getElementById('sessionList').innerHTML = html || `<div style="text-align:center;color:#999;padding:40px;">本月此隊員無出席記錄</div>`;
-    
+
+    let identityText = memberConfig.isEmployee ? " (⭐內部員工)" : (memberConfig.isGuest ? " (👤客席嘉賓)" : "");
+    document.getElementById('headerSub').innerHTML = `${selectedMonth} 月結清單${identityText}`;
+
     if (isPaid) {
         summaryCard.classList.add('is-paid');
         statusBadge.innerHTML = "🟢 已付款";
         statusBadge.className = "status-badge paid";
-        payBox.style.display = "none";
-        whatsappBox.style.display = "none"; // 如果已在後台轉為 TRUE 狀態，則不顯示按鈕
-        copyAmtBtn.style.display = "none"; 
+        payBox.classList.add('hidden');
+        whatsappBox.classList.add('hidden');
+        copyAmtBtn.style.display = "none";
     } else {
         summaryCard.classList.remove('is-paid');
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
-        payBox.style.display = "block";
-        whatsappBox.style.display = "block"; // 未付款狀態時展示獨立的 WhatsApp 框
-        
-        if(totalNeedToPay > 0) {
+        payBox.classList.remove('hidden');
+        whatsappBox.classList.remove('hidden');
+
+        if (totalNeedToPay > 0) {
             copyAmtBtn.style.display = "block";
         } else {
             copyAmtBtn.style.display = "none";
         }
+
+        // 更新 WhatsApp 按鈕金額
+        const amtStr = totalNeedToPay.toFixed(2);
+        const badge = document.getElementById('whatsappAmtBadge');
+        if (badge) {
+            badge.innerText = `已付 $${amtStr}`;
+        }
+
+        // 綁定 WhatsApp 點擊事件（避免重複綁定）
+        const waBtn = document.getElementById('whatsappBtn');
+        const newBtn = waBtn.cloneNode(true);
+        waBtn.parentNode.replaceChild(newBtn, waBtn);
+
+        newBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const amount = totalNeedToPay.toFixed(2);
+            const msg = `我已付款 $${amount}，請確認 🙏`;
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+        });
+
+        newBtn.id = 'whatsappBtn';
+        const newBadge = newBtn.querySelector('.amt-badge');
+        if (newBadge) {
+            newBadge.innerText = `已付 $${totalNeedToPay.toFixed(2)}`;
+        }
     }
-    
-    let identityText = memberConfig.isEmployee ? " (⭐內部員工)" : (memberConfig.isGuest ? " (👤客席嘉賓)" : "");
-    document.getElementById('headerSub').innerHTML = `${selectedMonth} 月結清單${identityText}`;
 }
 
 initApp();
