@@ -112,12 +112,16 @@
                 <button class="pay-btn" style="background: #00a4e4; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 Alipay，進入後直接貼上金額即可。'); window.open('https://qr.alipay.hk/281004010496IPnb5AYmN49jpe8Zkbb48dyG', '_blank')">
                     使用 Alipay 付款 (自動複製金額)
                 </button>
-
-                <button class="pay-btn" style="background: #25D366; margin: 0;" onclick="sendWhatsAppNotification()">
-                    WhatsApp 收款人 (已付複製金額)
-                </button>
             </div>
         </div>
+
+        <div id="whatsappBox" style="background: #f4fbf7; border: 1px solid #d1f2e1; border-radius: 12px; padding: 16px; margin-top: 14px; text-align: center; display: none;">
+            <p style="font-size: 13px; font-weight: 500; margin-bottom: 8px; color: #27ae60;">👍 付款後請通知收款人確認</p>
+            <button class="pay-btn" style="background: #25D366; margin: 0;" onclick="sendWhatsAppNotification()">
+                💬 WhatsApp 通知收款人 (自動帶入已付金額)
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -176,18 +180,15 @@ async function initApp() {
         const textSettings = await resSettings.text();
         const arrSettings = csvToArray(textSettings);
         
-        // 🌟 清洗欄位：移除不可見字元、轉小寫，確保完全排除空白欄位干擾
         const cleanHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim().toLowerCase() : "");
         globalData.settingsHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim() : "");
         
-        // 🌟 改用極其寬鬆的 indexOf / findIndex，不再受 C 欄空白欄位影響
         let monthIdx = cleanHeaders.findIndex(h => h !== "" && h.includes("month"));
         let shuttleFeeIdx = cleanHeaders.findIndex(h => h !== "" && (h.includes("shuttlecock") || h.includes("fee")));
         let nameIdx = cleanHeaders.findIndex(h => h !== "" && h === "name");
         let empIdx = cleanHeaders.findIndex(h => h !== "" && h.includes("employee"));
         let guestIdx = cleanHeaders.findIndex(h => h !== "" && (h.includes("guess") || h.includes("guest")));
 
-        // 萬一找不到的備用絕對坐標
         if (monthIdx === -1) monthIdx = 0;
         if (shuttleFeeIdx === -1) shuttleFeeIdx = 1;
         if (nameIdx === -1) nameIdx = 3; 
@@ -297,6 +298,7 @@ function renderBill() {
     const summaryCard = document.getElementById('summaryCard');
     const statusBadge = document.getElementById('statusBadge');
     const payBox = document.getElementById('payBox');
+    const whatsappBox = document.getElementById('whatsappBox');
     const copyAmtBtn = document.getElementById('copyAmtBtn');
     
     if (selectedMonth === "-" || currentName === "-") {
@@ -309,6 +311,7 @@ function renderBill() {
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
         payBox.style.display = "none";
+        whatsappBox.style.display = "none";
         copyAmtBtn.style.display = "none"; 
         return;
     }
@@ -409,12 +412,14 @@ function renderBill() {
         statusBadge.innerHTML = "🟢 已付款";
         statusBadge.className = "status-badge paid";
         payBox.style.display = "none";
+        whatsappBox.style.display = "none"; // 如果已在後台轉為 TRUE 狀態，則不顯示按鈕
         copyAmtBtn.style.display = "none"; 
     } else {
         summaryCard.classList.remove('is-paid');
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
         payBox.style.display = "block";
+        whatsappBox.style.display = "block"; // 未付款狀態時展示獨立的 WhatsApp 框
         
         if(totalNeedToPay > 0) {
             copyAmtBtn.style.display = "block";
