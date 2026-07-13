@@ -103,8 +103,8 @@
 </div>
 
 <script>
-// 🌟 已更新為新的 HKT 試算表 ID 網址
-const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1v1-zeU3Yuj9WNcVsLTKNBsqssNLqiqtFHIS9RI1jmYVME/pubhtml';
+// 🌟 已修正：精確對應 HKT 試算表的 ID
+const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS1hZbbdNjugrcz-_le4VK6h7nicPwlZqamR865HwKH0/pubhtml';
 
 let globalData = {
     sessions: [],
@@ -153,8 +153,8 @@ async function initApp() {
     try {
         const csvBaseUrl = BASE_PUBLISH_URL.replace('/pubhtml', '/pub?output=csv');
         
-        // 1. 讀取 Settings 分頁 (使用新試算表對應的 gid)
-        const resSettings = await fetch(`${csvBaseUrl}&gid=777656204`);
+        // 1. 讀取 Settings 分頁
+        const resSettings = await fetch(`${csvBaseUrl}&gid=2024390252`);
         const textSettings = await resSettings.text();
         const arrSettings = csvToArray(textSettings);
         
@@ -178,8 +178,6 @@ async function initApp() {
             let gstCol = (guestIdx !== -1 && row[guestIdx]) ? row[guestIdx].trim().toUpperCase() : "";
             
             if (mCol !== "" && !mCol.includes("function") && !mCol.includes("Object")) {
-                // 相容可能被省略年份的輸入
-                if(mCol.length === 2) mCol = "Jun-2026"; 
                 lastSeenMonth = mCol;
                 globalData.monthlyShuttle[lastSeenMonth] = parseFloat(feeCol) || 0;
             }
@@ -193,7 +191,7 @@ async function initApp() {
             }
         });
 
-        // 2. 讀取 Sessions 分頁 (通常預設第一頁為 gid=0)
+        // 2. 讀取 Sessions 分頁
         const resSessions = await fetch(`${csvBaseUrl}&gid=0`);
         const textSessions = await resSessions.text();
         const arrSessions = csvToArray(textSessions);
@@ -228,7 +226,7 @@ async function initApp() {
         renderBill(); 
 
     } catch (error) {
-        document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保 HKT 試算表已發佈到網路！<br>錯誤詳情: ${error}`;
+        document.getElementById('loading').innerHTML = `❌ 數據解析失敗，請確保試算表已「發佈到網路」！<br>錯誤詳情: ${error}`;
     }
 }
 
@@ -288,6 +286,11 @@ function renderBill() {
     let isPaid = false;
     if (paidColumnIndex !== -1 && memberConfig.rawRowData[paidColumnIndex]) {
         isPaid = memberConfig.rawRowData[paidColumnIndex].trim().toUpperCase() === 'TRUE';
+    } else {
+        const fallBackPaidIdx = globalData.settingsHeaders.indexOf("Paid");
+        if(fallBackPaidIdx !== -1 && memberConfig.rawRowData[fallBackPaidIdx]) {
+            isPaid = memberConfig.rawRowData[fallBackPaidIdx].trim().toUpperCase() === 'TRUE';
+        }
     }
 
     let dateKeywordShort = selectedMonth; 
