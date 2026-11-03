@@ -64,7 +64,7 @@
     <div class="header">
         <h1>🏸 羽毛球費用查閱系統</h1>
         <p id="headerSub">請在下方選擇隊員</p>
-        <div class="remark">每日實際羽毛球開支按日攤分</div>
+        <div class="remark">⚠️ 按出席日數實報實銷</div>
     </div>
 
     <div class="selector-box">
@@ -105,7 +105,7 @@
                     轉賬至 FPS (一鍵複製號碼)
                 </button>
                 
-                <button class="pay-btn" style="background: #e71d36; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即將開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
+                <button class="pay-btn" style="background: #e71d36; margin: 0;" onclick="const amt = document.getElementById('totalAmount').innerText.replace('$',''); navigator.clipboard.writeText(amt); alert('📋 已為你自動複製應付金額：$' + amt + ' ！\n即遇到開啟 PayMe，進入後直接貼上金額即可。'); window.location.href='https://payme.hsbc/5e115e6f63ec45a6b5e843a7fc08b3d3'">
                     使用 PayMe 付款 (自動複製金額)
                 </button>
                 
@@ -130,7 +130,7 @@ const BASE_PUBLISH_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSLj4-
 
 let globalData = {
     sessions: [],
-    availableMonths: new Set(), 
+    availableMonths: [], // 自動從 Settings 中抽取的月份
     members: {},
     settingsHeaders: [] 
 };
@@ -183,28 +183,30 @@ async function initApp() {
         const cleanHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim().toLowerCase() : "");
         globalData.settingsHeaders = arrSettings[0].map(h => h ? h.replace(/^\uFEFF/, '').trim() : "");
         
-        let monthIdx = cleanHeaders.findIndex(h => h !== "" && h.includes("month"));
-        let nameIdx = cleanHeaders.findIndex(h => h !== "" && h === "name");
-        let empIdx = cleanHeaders.findIndex(h => h !== "" && h.includes("employee"));
-        let guestIdx = cleanHeaders.findIndex(h => h !== "" && (h.includes("guess") || h.includes("guest")));
+        // 自動抽取所有的 "Paid_XXX" 欄位來作為月份選項，無需 Month 欄
+        globalData.settingsHeaders.forEach(header => {
+            const match = header.match(/^Paid_(.+)$/i);
+            if (match && !globalData.availableMonths.includes(match[1])) {
+                globalData.availableMonths.push(match[1]);
+            }
+        });
+        
+        // 動態尋找 Name, Employee, Guest 欄位的索引
+        let nameIdx = cleanHeaders.findIndex(h => h === "name");
+        let empIdx = cleanHeaders.findIndex(h => h.includes("employee"));
+        let guestIdx = cleanHeaders.findIndex(h => h.includes("guess") || h.includes("guest"));
 
-        if (monthIdx === -1) monthIdx = 0;
-        if (nameIdx === -1) nameIdx = 3; 
-        if (empIdx === -1) empIdx = 4;
-        if (guestIdx === -1) guestIdx = 5;
+        // 若找不到對應的標題（可能改了名），設預設值防呆
+        if (nameIdx === -1) nameIdx = 0; 
+        if (empIdx === -1) empIdx = 1;
+        if (guestIdx === -1) guestIdx = 2;
 
         arrSettings.forEach((row, index) => {
             if (index === 0) return; 
             
-            let mCol = row[monthIdx] ? row[monthIdx].trim() : "";
             let nameCol = row[nameIdx] ? row[nameIdx].trim() : "";
             let empCol = row[empIdx] ? row[empIdx].trim().toUpperCase() : "";
             let gstCol = row[guestIdx] ? row[guestIdx].trim().toUpperCase() : "";
-            
-            // 記錄所有出現過的月份
-            if (mCol !== "" && !mCol.includes("<html") && !mCol.includes("function")) {
-                globalData.availableMonths.add(mCol);
-            }
             
             if (nameCol !== "" && !nameCol.includes("<html") && !nameCol.includes("function")) {
                 globalData.members[nameCol] = {
@@ -226,11 +228,11 @@ async function initApp() {
             const row = arrSessions[i];
             if(!row[0] || row[0].trim() === "" || row[0].includes("<html")) continue;
             
+            // 重要更新：這裡將直接讀取 row[2] 作為實際羽毛球開銷數字 (Float)，不再是 TRUE/FALSE
             let session = {
                 date: row[0].trim(),
                 bookingFee: parseFloat(row[1]) || 0,
-                // 原本是 true/false，現在直接讀取當日實際開支金額
-                shuttleFee: parseFloat(row[2]) || 0, 
+                shuttleFee: parseFloat(row[2]) || 0, // 每日真實買波錢
                 guessFee: parseFloat(row[3]) || 0,
                 attendees: []
             };
@@ -264,6 +266,7 @@ function initSelectors() {
     mBlank.innerHTML = "-";
     monthSelect.appendChild(mBlank);
     
+    // 動態填入自動抓取的月份
     globalData.availableMonths.forEach(m => {
         let opt = document.createElement('option');
         opt.value = m;
@@ -314,6 +317,7 @@ function renderBill() {
 
     const memberConfig = globalData.members[currentName];
 
+    // 檢查已付狀態 (Paid_XXX)
     const targetHeaderName = `Paid_${selectedMonth}`;
     const paidColumnIndex = globalData.settingsHeaders.findIndex(h => h.replace(/^\uFEFF/, '').trim().toLowerCase() === targetHeaderName.toLowerCase());
     
@@ -322,10 +326,9 @@ function renderBill() {
         isPaid = memberConfig.rawRowData[paidColumnIndex].trim().toUpperCase() === 'TRUE';
     }
 
-    let dateKeywordShort = selectedMonth; 
-
+    // 篩選出該月份的所有 Session
     const monthlySessions = globalData.sessions.filter(s => 
-        s.date.toLowerCase().includes(dateKeywordShort.toLowerCase())
+        s.date.toLowerCase().includes(selectedMonth.toLowerCase())
     );
 
     let totalNeedToPay = 0;
@@ -336,14 +339,16 @@ function renderBill() {
         if (session.attendees.includes(currentName)) {
             totalSessionsAttended++;
             
+            // 當日場地費分攤
             const courtShare = session.bookingFee / session.attendees.length;
             
+            // 當日真實買波錢分攤
             let shuttleShare = 0;
-            // 如果當天有羽毛球開支，就將其除以當天出席人數
             if (session.shuttleFee > 0 && session.attendees.length > 0) {
                 shuttleShare = session.shuttleFee / session.attendees.length;
             }
             
+            // Guest Fee 計算
             let guessShare = 0;
             if (memberConfig.isGuest) {
                 guessShare = 10.00;
@@ -366,20 +371,21 @@ function renderBill() {
                         </div>
             `;
             
-            // 只在當日有實際羽毛球支出的情況下顯示分攤
+            // 若該日有羽毛球開支，則列出獨立開支
             if (session.shuttleFee > 0) {
                 html += `
                     <div class="row-detail">
-                        <span>• 羽毛球分攤 ($${session.shuttleFee.toFixed(2)} ÷ ${session.attendees.length}人)</span>
+                        <span>• 羽毛球分攤</span>
                         <span>$${shuttleShare.toFixed(2)}</span>
                     </div>
+                    <div class="row-detail sub">(該日波錢 $${session.shuttleFee.toFixed(2)} ÷ ${session.attendees.length}人)</div>
                 `;
             }
             
             if (guessShare > 0) {
                 html += `
                     <div class="row-detail" style="color:#e74c3c; font-weight:500;">
-                        <span>• Guess Fee</span>
+                        <span>• Guest Fee</span>
                         <span>$${guessShare.toFixed(2)}</span>
                     </div>
                 `;
@@ -405,14 +411,14 @@ function renderBill() {
         statusBadge.innerHTML = "🟢 已付款";
         statusBadge.className = "status-badge paid";
         payBox.style.display = "none";
-        whatsappBox.style.display = "none"; 
+        whatsappBox.style.display = "none";
         copyAmtBtn.style.display = "none"; 
     } else {
         summaryCard.classList.remove('is-paid');
         statusBadge.innerHTML = "🔴 未付款";
         statusBadge.className = "status-badge unpaid";
         payBox.style.display = "block";
-        whatsappBox.style.display = "block"; 
+        whatsappBox.style.display = "block";
         
         if(totalNeedToPay > 0) {
             copyAmtBtn.style.display = "block";
